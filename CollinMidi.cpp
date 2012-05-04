@@ -60,12 +60,7 @@
 // descriptors retrieved using descriptor_parser.pde (Usb library
 // example sketch)
 #define LPK25_ADDR            1
-#define LPK25_VID_LO          0xFFFFFFE8 // Akai VID
-#define LPK25_VID_HI          0x09
-#define LPK25_PID_LO          0x76 // Batch Device
-#define LPK25_PID_HI          0x00
 #define LPK25_CONFIG          1
-#define LPK25_IF              1
 #define LPK25_NUM_EP          2
 #define EP_MAXPKTSIZE         64
 #define EP_BULK               0x02
@@ -141,13 +136,6 @@ void LPK25_init()
     if (rcode) {
         Serial.print("Error attempting read device descriptor. Return code :");
         Serial.println(rcode, HEX);
-        while (1);
-    }
-
-    // Test device for Akai LPK25
-    if ((descrBuf[8] != LPK25_VID_LO) || (descrBuf[9] != LPK25_VID_HI)
-        || (descrBuf[10] != LPK25_PID_LO) || (descrBuf[11] != LPK25_PID_HI)) {
-        Serial.print("Unsupported USB Device");
         while (1);
     }
 
