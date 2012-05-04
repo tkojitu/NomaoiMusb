@@ -141,6 +141,36 @@ public:
         Serial.println("");
         delay(200);
     }
+
+    void pollUsb() {
+        byte rcode = usb.inTransfer(USB_ADDR, endpoints[INPUT_EP].epAddr,
+                                    USB_01_REPORT_LEN, buf);
+        if (rcode != 0) {
+            return;
+        }
+        reportProcess();
+    }
+
+    void reportProcess() {
+        byte i, codeIndexNumber;
+        for (i = 0; i < 4; i++) {
+            if (buf[i] != oldBuf[i]) {
+                break;
+            }
+        }
+        if (i == 4) {
+            return;
+        }
+        outBuf[0] = byte(buf[1]);
+        outBuf[1] = byte(buf[2]);
+        outBuf[2] = byte(buf[3]);
+        Serial.print(outBuf[0], HEX);
+        Serial.print(" ");
+        Serial.print(outBuf[1], HEX);
+        Serial.print(" ");
+        Serial.print(outBuf[2], HEX);
+        Serial.print("\n");
+    }
 };
 
 void* gCollin;
@@ -162,40 +192,6 @@ void loop()
         collin->usb.setUsbTaskState(USB_STATE_RUNNING);
     }
     if (collin->usb.getUsbTaskState() == USB_STATE_RUNNING) {
-        USB_poll();
+        collin->pollUsb();
     }
-}
-
-void USB_poll()
-{
-    CollinMidi* collin = (CollinMidi*)gCollin;
-    byte rcode = collin->usb.inTransfer(USB_ADDR,
-                                        collin->endpoints[INPUT_EP].epAddr,
-                                        USB_01_REPORT_LEN, buf);
-    if (rcode != 0) {
-        return;
-    }
-    process_report();
-}
-
-void process_report()
-{
-    byte i, codeIndexNumber;
-    for (i = 0; i < 4; i++) {
-        if (buf[i] != oldBuf[i]) {
-            break;
-        }
-    }
-    if (i == 4) {
-        return;
-    }
-    outBuf[0] = byte(buf[1]);
-    outBuf[1] = byte(buf[2]);
-    outBuf[2] = byte(buf[3]);
-    Serial.print(outBuf[0], HEX);
-    Serial.print(" ");
-    Serial.print(outBuf[1], HEX);
-    Serial.print(" ");
-    Serial.print(outBuf[2], HEX);
-    Serial.print("\n");
 }
