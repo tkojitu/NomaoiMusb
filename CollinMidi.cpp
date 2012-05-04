@@ -87,6 +87,17 @@ public:
         max.powerOn();
     }
 
+    void loop() {
+        doTasks();
+        if (usb.getUsbTaskState() == USB_STATE_CONFIGURING) {
+            initUsb();
+            usb.setUsbTaskState(USB_STATE_RUNNING);
+        }
+        if (usb.getUsbTaskState() == USB_STATE_RUNNING) {
+            pollUsb();
+        }
+    }
+
     void doTasks() {
         max.Task();
         usb.Task();
@@ -185,13 +196,5 @@ void setup()
 
 void loop()
 {
-    CollinMidi* collin = (CollinMidi*)gCollin;
-    collin->doTasks();
-    if (collin->usb.getUsbTaskState() == USB_STATE_CONFIGURING) {
-        collin->initUsb();
-        collin->usb.setUsbTaskState(USB_STATE_RUNNING);
-    }
-    if (collin->usb.getUsbTaskState() == USB_STATE_RUNNING) {
-        collin->pollUsb();
-    }
+    ((CollinMidi*)gCollin)->loop();
 }
