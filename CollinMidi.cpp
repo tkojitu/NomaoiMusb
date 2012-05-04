@@ -6,6 +6,7 @@
 // modified for NomaoiMusb by tkojitu
 //////////////////////////////////////////////////////
 
+#include <string.h>
 #include <Max3421e.h>
 #include <Usb.h>
 #include <avr/pgmspace.h>
@@ -71,18 +72,24 @@
 #define USB_01_REPORT_LEN   0x09
 #define USB_DESCR_LEN       0x0C
 
-char descrBuf[12] = {0}; // buffer for device description data
-char buf[4] = {0}; // buffer for USB-MIDI data
-char oldBuf[4] = {0}; // buffer for old USB-MIDI data
-byte outBuf[3] = {0}; // buffer for outgoing MIDI data
-
 class CollinMidi {
 public:
     MAX3421E max;
     USB usb;
+    char descrBuf[12]; // buffer for device description data
+    char buf[4]; // buffer for USB-MIDI data
+    char oldBuf[4]; // buffer for old USB-MIDI data
+    byte outBuf[3]; // buffer for outgoing MIDI data
     EP_RECORD endpoints[USB_NUM_EP];
 
 public:
+    CollinMidi() {
+        memset(descrBuf, 0, sizeof(descrBuf));
+        memset(buf, 0, sizeof(buf));
+        memset(oldBuf, 0, sizeof(buf));
+        memset(outBuf, 0, sizeof(buf));
+    }
+
     void powerOnMax() {
         max.powerOn();
     }
@@ -98,6 +105,7 @@ public:
         }
     }
 
+private:
     void doTasks() {
         max.Task();
         usb.Task();
