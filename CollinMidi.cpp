@@ -3,6 +3,7 @@
 // for use with USB Host Shield from Circuitsathome.com
 // by Collin Cunningham - makezine.com, narbotic.com
 //
+// modified for NomaoiMusb by tkojitu
 //////////////////////////////////////////////////////
 
 #include <Max3421e.h>
