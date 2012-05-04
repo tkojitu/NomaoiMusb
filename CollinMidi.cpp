@@ -59,20 +59,20 @@
 /* LPK25 data taken from descriptors */
 // descriptors retrieved using descriptor_parser.pde (Usb library
 // example sketch)
-#define LPK25_ADDR            1
-#define LPK25_CONFIG          1
-#define LPK25_NUM_EP          2
-#define EP_MAXPKTSIZE         64
-#define EP_BULK               0x02
-#define EP_POLL               0x00 // 0x0B for Korg nanoKey
-#define CONTROL_EP            0
-#define OUTPUT_EP             1
-#define INPUT_EP              1
-#define LPK25_01_REPORT_LEN   0x09
-#define LPK25_DESCR_LEN       0x0C
+#define USB_ADDR            1
+#define USB_CONFIG          1
+#define USB_NUM_EP          2
+#define EP_MAXPKTSIZE       64
+#define EP_BULK             0x02
+#define EP_POLL             0x00 // 0x0B for Korg nanoKey
+#define CONTROL_EP          0
+#define OUTPUT_EP           1
+#define INPUT_EP            1
+#define USB_01_REPORT_LEN   0x09
+#define USB_DESCR_LEN       0x0C
 
 // endpoint record structure for the LPK25 controller
-EP_RECORD ep_record[LPK25_NUM_EP];
+EP_RECORD ep_record[USB_NUM_EP];
 
 char descrBuf[12] = {0}; // buffer for device description data
 char buf[4] = {0}; // buffer for USB-MIDI data
@@ -94,15 +94,15 @@ void loop()
     Max.Task();
     Usb.Task();
     if (Usb.getUsbTaskState() == USB_STATE_CONFIGURING) {
-        LPK25_init();
+        USB_init();
         Usb.setUsbTaskState(USB_STATE_RUNNING);
     }
     if (Usb.getUsbTaskState() == USB_STATE_RUNNING) {
-        LPK25_poll();
+        USB_poll();
     }
 }
 
-void LPK25_init()
+void USB_init()
 {
     byte rcode = 0;
     byte i;
@@ -128,11 +128,11 @@ void LPK25_init()
     ep_record[INPUT_EP].rcvToggle = bmRCVTOG0;
 
     // plug kbd.endpoint parameters to devtable
-    Usb.setDevTableEntry(LPK25_ADDR, ep_record);
+    Usb.setDevTableEntry(USB_ADDR, ep_record);
 
     // read the device descriptor and check VID and PID
-    rcode = Usb.getDevDescr(LPK25_ADDR, ep_record[CONTROL_EP].epAddr,
-                            LPK25_DESCR_LEN, descrBuf);
+    rcode = Usb.getDevDescr(USB_ADDR, ep_record[CONTROL_EP].epAddr,
+                            USB_DESCR_LEN, descrBuf);
     if (rcode) {
         Serial.print("Error attempting read device descriptor. Return code :");
         Serial.println(rcode, HEX);
@@ -140,7 +140,7 @@ void LPK25_init()
     }
 
     /* Configure device */
-    rcode = Usb.setConf(LPK25_ADDR, ep_record[CONTROL_EP].epAddr, LPK25_CONFIG);
+    rcode = Usb.setConf(USB_ADDR, ep_record[CONTROL_EP].epAddr, USB_CONFIG);
     if (rcode) {
         Serial.print("Error attempting to configure LPK25. Return code :");
         Serial.println(rcode, HEX);
@@ -153,10 +153,10 @@ void LPK25_init()
     delay(200);
 }
 
-void LPK25_poll()
+void USB_poll()
 {
-  byte rcode = Usb.inTransfer(LPK25_ADDR, ep_record[INPUT_EP].epAddr,
-                              LPK25_01_REPORT_LEN, buf);
+  byte rcode = Usb.inTransfer(USB_ADDR, ep_record[INPUT_EP].epAddr,
+                              USB_01_REPORT_LEN, buf);
   if (rcode != 0) {
     return;
   }
