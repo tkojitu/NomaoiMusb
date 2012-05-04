@@ -113,20 +113,21 @@ private:
 
     void initUsb() {
         byte rcode = 0;
-        byte i;
+        initEndpointControl();
+        initEndpointInput();
+        initEndpointOutput();
+        usb.setDevTableEntry(USB_ADDR, endpoints);
+        readDeviceDesc();
+        configureDevice();
+        printGreeting();
+        delay(200);
+    }
 
-        /* Initialize data structures for endpoints of device 1*/
-        // copy endpoint 0 parameters
+    void initEndpointControl() {
         endpoints[CONTROL_EP] = *(usb.getDevTableEntry(0, 0));
+    }
 
-        // Output endpoint, 0x02 for Keystation mini 32
-        endpoints[OUTPUT_EP].epAddr = 0x02;
-        endpoints[OUTPUT_EP].Attr = EP_BULK;
-        endpoints[OUTPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
-        endpoints[OUTPUT_EP].Interval = EP_POLL;
-        endpoints[OUTPUT_EP].sndToggle = bmSNDTOG0;
-        endpoints[OUTPUT_EP].rcvToggle = bmRCVTOG0;
-
+    void initEndpointInput() {
         // Input endpoint, 0x01 for Keystation mini 32
         endpoints[INPUT_EP].epAddr = 0x01;
         endpoints[INPUT_EP].Attr = EP_BULK;
@@ -134,31 +135,43 @@ private:
         endpoints[INPUT_EP].Interval = EP_POLL;
         endpoints[INPUT_EP].sndToggle = bmSNDTOG0;
         endpoints[INPUT_EP].rcvToggle = bmRCVTOG0;
+    }
 
-        // plug kbd.endpoint parameters to devtable
-        usb.setDevTableEntry(USB_ADDR, endpoints);
+    void initEndpointOutput() {
+        // Output endpoint, 0x02 for Keystation mini 32
+        endpoints[OUTPUT_EP].epAddr = 0x02;
+        endpoints[OUTPUT_EP].Attr = EP_BULK;
+        endpoints[OUTPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
+        endpoints[OUTPUT_EP].Interval = EP_POLL;
+        endpoints[OUTPUT_EP].sndToggle = bmSNDTOG0;
+        endpoints[OUTPUT_EP].rcvToggle = bmRCVTOG0;
+    }
 
-        // read the device descriptor and check VID and PID
-        rcode = usb.getDevDescr(USB_ADDR, endpoints[CONTROL_EP].epAddr,
-                                USB_DESCR_LEN, descrBuf);
+    void readDeviceDesc() {
+        byte rcode = usb.getDevDescr(USB_ADDR, endpoints[CONTROL_EP].epAddr,
+                                     USB_DESCR_LEN, descrBuf);
         if (rcode) {
             Serial.print("Error attempting read device descriptor. Return code: ");
             Serial.println(rcode, HEX);
             while (1);
         }
+    }
 
-        /* Configure device */
-        rcode = usb.setConf(USB_ADDR, endpoints[CONTROL_EP].epAddr, USB_CONFIG);
+    void configureDevice() {
+        byte rcode = usb.setConf(USB_ADDR, endpoints[CONTROL_EP].epAddr,
+                                 USB_CONFIG);
         if (rcode) {
             Serial.print("Error attempting to configure USB. Return code: ");
             Serial.println(rcode, HEX);
             while (1);
         }
+    }
+
+    void printGreeting() {
         Serial.println("USB initialized");
         Serial.println("");
         Serial.println("");
         Serial.println("");
-        delay(200);
     }
 
     void pollUsb() {
