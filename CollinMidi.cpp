@@ -71,7 +71,7 @@
 #define USB_01_REPORT_LEN   0x09
 #define USB_DESCR_LEN       0x0C
 
-// endpoint record structure for the LPK25 controller
+// endpoint record structure
 EP_RECORD ep_record[USB_NUM_EP];
 
 char descrBuf[12] = {0}; // buffer for device description data
@@ -84,7 +84,7 @@ USB Usb;
 
 void setup()
 {
-    Serial.begin(31250);
+    Serial.begin(115200);
     Max.powerOn();
     delay(200);
 }
@@ -134,7 +134,7 @@ void USB_init()
     rcode = Usb.getDevDescr(USB_ADDR, ep_record[CONTROL_EP].epAddr,
                             USB_DESCR_LEN, descrBuf);
     if (rcode) {
-        Serial.print("Error attempting read device descriptor. Return code :");
+        Serial.print("Error attempting read device descriptor. Return code: ");
         Serial.println(rcode, HEX);
         while (1);
     }
@@ -142,11 +142,11 @@ void USB_init()
     /* Configure device */
     rcode = Usb.setConf(USB_ADDR, ep_record[CONTROL_EP].epAddr, USB_CONFIG);
     if (rcode) {
-        Serial.print("Error attempting to configure LPK25. Return code :");
+        Serial.print("Error attempting to configure USB. Return code: ");
         Serial.println(rcode, HEX);
         while (1);
     }
-    Serial.println("Akai LPK25 initialized");
+    Serial.println("USB initialized");
     Serial.println("");
     Serial.println("");
     Serial.println("");
@@ -155,12 +155,12 @@ void USB_init()
 
 void USB_poll()
 {
-  byte rcode = Usb.inTransfer(USB_ADDR, ep_record[INPUT_EP].epAddr,
-                              USB_01_REPORT_LEN, buf);
-  if (rcode != 0) {
-    return;
-  }
-  process_report();
+    byte rcode = Usb.inTransfer(USB_ADDR, ep_record[INPUT_EP].epAddr,
+                                USB_01_REPORT_LEN, buf);
+    if (rcode != 0) {
+        return;
+    }
+    process_report();
 }
 
 void process_report()
