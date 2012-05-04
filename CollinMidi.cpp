@@ -60,6 +60,7 @@ CollinMidi::CollinMidi() : max3421e(NULL), usb(NULL) {
     memset(descrBuf, 0, sizeof(descrBuf));
     memset(buf, 0, sizeof(buf));
     memset(oldBuf, 0, sizeof(buf));
+    // avr libc does not support new/delete [].
     endpoints = (EP_RECORD*)calloc(USB_NUM_EP, sizeof(EP_RECORD));
 }
 

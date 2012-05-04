@@ -47,4 +47,3 @@ private:
     void pollUsb();
     void reportProcess();
 };
-
