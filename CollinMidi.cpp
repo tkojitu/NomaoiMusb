@@ -81,7 +81,6 @@ public:
     char descrBuf[12]; // buffer for device description data
     char buf[4]; // buffer for USB-MIDI data
     char oldBuf[4]; // buffer for old USB-MIDI data
-    byte outBuf[3]; // buffer for outgoing MIDI data
     EP_RECORD endpoints[USB_NUM_EP];
 
 public:
@@ -89,7 +88,6 @@ public:
         memset(descrBuf, 0, sizeof(descrBuf));
         memset(buf, 0, sizeof(buf));
         memset(oldBuf, 0, sizeof(buf));
-        memset(outBuf, 0, sizeof(buf));
     }
 
     void powerOnMax() {
@@ -173,38 +171,24 @@ private:
     }
 
     void reportProcess() {
-        byte i, codeIndexNumber;
-        for (i = 0; i < 4; i++) {
-            if (buf[i] != oldBuf[i]) {
-                break;
-            }
-        }
-        if (i == 4) {
-            return;
-        }
-        outBuf[0] = byte(buf[1]);
-        outBuf[1] = byte(buf[2]);
-        outBuf[2] = byte(buf[3]);
-        Serial.print(outBuf[0], HEX);
+        Serial.print(byte(buf[1]), HEX);
         Serial.print(" ");
-        Serial.print(outBuf[1], HEX);
+        Serial.print(byte(buf[2]), HEX);
         Serial.print(" ");
-        Serial.print(outBuf[2], HEX);
+        Serial.print(byte(buf[3]), HEX);
         Serial.print("\n");
     }
 };
 
 void* gCollin;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     gCollin = new CollinMidi();
     ((CollinMidi*)gCollin)->powerOnMax();
     delay(200);
 }
 
-void loop()
-{
+void loop() {
     ((CollinMidi*)gCollin)->loop();
 }
