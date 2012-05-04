@@ -61,13 +61,13 @@
 // example sketch)
 #define USB_ADDR            1
 #define USB_CONFIG          1
-#define USB_NUM_EP          2
+#define USB_NUM_EP          3
 #define EP_MAXPKTSIZE       64
 #define EP_BULK             0x02
 #define EP_POLL             0x00 // 0x0B for Korg nanoKey
 #define CONTROL_EP          0
 #define OUTPUT_EP           1
-#define INPUT_EP            1
+#define INPUT_EP            2
 #define USB_01_REPORT_LEN   0x09
 #define USB_DESCR_LEN       0x0C
 
@@ -111,15 +111,15 @@ void USB_init()
     // copy endpoint 0 parameters
     ep_record[CONTROL_EP] = *(Usb.getDevTableEntry(0, 0));
 
-    // Output endpoint, 0x02 for Korg nanoKey
-    ep_record[OUTPUT_EP].epAddr = 0x01;
+    // Output endpoint, 0x02 for Keystation mini 32
+    ep_record[OUTPUT_EP].epAddr = 0x02;
     ep_record[OUTPUT_EP].Attr  = EP_BULK;
     ep_record[OUTPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
     ep_record[OUTPUT_EP].Interval  = EP_POLL;
     ep_record[OUTPUT_EP].sndToggle = bmSNDTOG0;
     ep_record[OUTPUT_EP].rcvToggle = bmRCVTOG0;
 
-    // Input endpoint, 0x02 for Korg nanoKey
+    // Input endpoint, 0x01 for Keystation mini 32
     ep_record[INPUT_EP].epAddr = 0x01;
     ep_record[INPUT_EP].Attr  = EP_BULK;
     ep_record[INPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
