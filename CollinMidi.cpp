@@ -90,7 +90,7 @@ public:
         memset(oldBuf, 0, sizeof(buf));
     }
 
-    void powerOnMax() {
+    void setup() {
         max.powerOn();
     }
 
@@ -198,7 +198,7 @@ void* gCollin;
 void setup() {
     Serial.begin(115200);
     gCollin = new CollinMidi();
-    ((CollinMidi*)gCollin)->powerOnMax();
+    ((CollinMidi*)gCollin)->setup();
     delay(200);
 }
 
