@@ -71,92 +71,107 @@
 #define USB_01_REPORT_LEN   0x09
 #define USB_DESCR_LEN       0x0C
 
-// endpoint record structure
-EP_RECORD ep_record[USB_NUM_EP];
-
 char descrBuf[12] = {0}; // buffer for device description data
 char buf[4] = {0}; // buffer for USB-MIDI data
 char oldBuf[4] = {0}; // buffer for old USB-MIDI data
 byte outBuf[3] = {0}; // buffer for outgoing MIDI data
 
-MAX3421E Max;
-USB Usb;
+class CollinMidi {
+public:
+    MAX3421E max;
+    USB usb;
+    EP_RECORD endpoints[USB_NUM_EP];
+
+public:
+    void powerOnMax() {
+        max.powerOn();
+    }
+
+    void doTasks() {
+        max.Task();
+        usb.Task();
+    }
+
+    void initUsb() {
+        byte rcode = 0;
+        byte i;
+
+        /* Initialize data structures for endpoints of device 1*/
+        // copy endpoint 0 parameters
+        endpoints[CONTROL_EP] = *(usb.getDevTableEntry(0, 0));
+
+        // Output endpoint, 0x02 for Keystation mini 32
+        endpoints[OUTPUT_EP].epAddr = 0x02;
+        endpoints[OUTPUT_EP].Attr = EP_BULK;
+        endpoints[OUTPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
+        endpoints[OUTPUT_EP].Interval = EP_POLL;
+        endpoints[OUTPUT_EP].sndToggle = bmSNDTOG0;
+        endpoints[OUTPUT_EP].rcvToggle = bmRCVTOG0;
+
+        // Input endpoint, 0x01 for Keystation mini 32
+        endpoints[INPUT_EP].epAddr = 0x01;
+        endpoints[INPUT_EP].Attr = EP_BULK;
+        endpoints[INPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
+        endpoints[INPUT_EP].Interval = EP_POLL;
+        endpoints[INPUT_EP].sndToggle = bmSNDTOG0;
+        endpoints[INPUT_EP].rcvToggle = bmRCVTOG0;
+
+        // plug kbd.endpoint parameters to devtable
+        usb.setDevTableEntry(USB_ADDR, endpoints);
+
+        // read the device descriptor and check VID and PID
+        rcode = usb.getDevDescr(USB_ADDR, endpoints[CONTROL_EP].epAddr,
+                                USB_DESCR_LEN, descrBuf);
+        if (rcode) {
+            Serial.print("Error attempting read device descriptor. Return code: ");
+            Serial.println(rcode, HEX);
+            while (1);
+        }
+
+        /* Configure device */
+        rcode = usb.setConf(USB_ADDR, endpoints[CONTROL_EP].epAddr, USB_CONFIG);
+        if (rcode) {
+            Serial.print("Error attempting to configure USB. Return code: ");
+            Serial.println(rcode, HEX);
+            while (1);
+        }
+        Serial.println("USB initialized");
+        Serial.println("");
+        Serial.println("");
+        Serial.println("");
+        delay(200);
+    }
+};
+
+void* gCollin;
 
 void setup()
 {
     Serial.begin(115200);
-    Max.powerOn();
+    gCollin = new CollinMidi();
+    ((CollinMidi*)gCollin)->powerOnMax();
     delay(200);
 }
 
 void loop()
 {
-    Max.Task();
-    Usb.Task();
-    if (Usb.getUsbTaskState() == USB_STATE_CONFIGURING) {
-        USB_init();
-        Usb.setUsbTaskState(USB_STATE_RUNNING);
+    CollinMidi* collin = (CollinMidi*)gCollin;
+    collin->doTasks();
+    if (collin->usb.getUsbTaskState() == USB_STATE_CONFIGURING) {
+        collin->initUsb();
+        collin->usb.setUsbTaskState(USB_STATE_RUNNING);
     }
-    if (Usb.getUsbTaskState() == USB_STATE_RUNNING) {
+    if (collin->usb.getUsbTaskState() == USB_STATE_RUNNING) {
         USB_poll();
     }
 }
 
-void USB_init()
-{
-    byte rcode = 0;
-    byte i;
-
-    /* Initialize data structures for endpoints of device 1*/
-    // copy endpoint 0 parameters
-    ep_record[CONTROL_EP] = *(Usb.getDevTableEntry(0, 0));
-
-    // Output endpoint, 0x02 for Keystation mini 32
-    ep_record[OUTPUT_EP].epAddr = 0x02;
-    ep_record[OUTPUT_EP].Attr  = EP_BULK;
-    ep_record[OUTPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
-    ep_record[OUTPUT_EP].Interval  = EP_POLL;
-    ep_record[OUTPUT_EP].sndToggle = bmSNDTOG0;
-    ep_record[OUTPUT_EP].rcvToggle = bmRCVTOG0;
-
-    // Input endpoint, 0x01 for Keystation mini 32
-    ep_record[INPUT_EP].epAddr = 0x01;
-    ep_record[INPUT_EP].Attr  = EP_BULK;
-    ep_record[INPUT_EP].MaxPktSize = EP_MAXPKTSIZE;
-    ep_record[INPUT_EP].Interval  = EP_POLL;
-    ep_record[INPUT_EP].sndToggle = bmSNDTOG0;
-    ep_record[INPUT_EP].rcvToggle = bmRCVTOG0;
-
-    // plug kbd.endpoint parameters to devtable
-    Usb.setDevTableEntry(USB_ADDR, ep_record);
-
-    // read the device descriptor and check VID and PID
-    rcode = Usb.getDevDescr(USB_ADDR, ep_record[CONTROL_EP].epAddr,
-                            USB_DESCR_LEN, descrBuf);
-    if (rcode) {
-        Serial.print("Error attempting read device descriptor. Return code: ");
-        Serial.println(rcode, HEX);
-        while (1);
-    }
-
-    /* Configure device */
-    rcode = Usb.setConf(USB_ADDR, ep_record[CONTROL_EP].epAddr, USB_CONFIG);
-    if (rcode) {
-        Serial.print("Error attempting to configure USB. Return code: ");
-        Serial.println(rcode, HEX);
-        while (1);
-    }
-    Serial.println("USB initialized");
-    Serial.println("");
-    Serial.println("");
-    Serial.println("");
-    delay(200);
-}
-
 void USB_poll()
 {
-    byte rcode = Usb.inTransfer(USB_ADDR, ep_record[INPUT_EP].epAddr,
-                                USB_01_REPORT_LEN, buf);
+    CollinMidi* collin = (CollinMidi*)gCollin;
+    byte rcode = collin->usb.inTransfer(USB_ADDR,
+                                        collin->endpoints[INPUT_EP].epAddr,
+                                        USB_01_REPORT_LEN, buf);
     if (rcode != 0) {
         return;
     }
