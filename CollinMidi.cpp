@@ -76,39 +76,48 @@ public:
         INPUT_EP  = 2,
     };
 
-    MAX3421E max;
-    USB usb;
+    MAX3421E* max3421e;
+    USB* usb;
     char descrBuf[12]; // buffer for device description data
     char buf[4]; // buffer for USB-MIDI data
     char oldBuf[4]; // buffer for old USB-MIDI data
-    EP_RECORD endpoints[USB_NUM_EP];
+    EP_RECORD* endpoints;
 
 public:
-    CollinMidi() {
+    CollinMidi() : max3421e(NULL), usb(NULL) {
+        max3421e = new MAX3421E();
+        usb = new USB();
         memset(descrBuf, 0, sizeof(descrBuf));
         memset(buf, 0, sizeof(buf));
         memset(oldBuf, 0, sizeof(buf));
+        endpoints = (EP_RECORD*)calloc(USB_NUM_EP, sizeof(EP_RECORD));
+    }
+
+    ~CollinMidi() {
+        delete max3421e;
+        delete usb;
+        free(endpoints);
     }
 
     void setup() {
-        max.powerOn();
+        max3421e->powerOn();
     }
 
     void loop() {
         doTasks();
-        if (usb.getUsbTaskState() == USB_STATE_CONFIGURING) {
+        if (usb->getUsbTaskState() == USB_STATE_CONFIGURING) {
             initUsb();
-            usb.setUsbTaskState(USB_STATE_RUNNING);
+            usb->setUsbTaskState(USB_STATE_RUNNING);
         }
-        if (usb.getUsbTaskState() == USB_STATE_RUNNING) {
+        if (usb->getUsbTaskState() == USB_STATE_RUNNING) {
             pollUsb();
         }
     }
 
 private:
     void doTasks() {
-        max.Task();
-        usb.Task();
+        max3421e->Task();
+        usb->Task();
     }
 
     void initUsb() {
@@ -116,7 +125,7 @@ private:
         initEndpointControl();
         initEndpointInput();
         initEndpointOutput();
-        usb.setDevTableEntry(USB_ADDR, endpoints);
+        usb->setDevTableEntry(USB_ADDR, endpoints);
         readDeviceDesc();
         configureDevice();
         printGreeting();
@@ -124,7 +133,7 @@ private:
     }
 
     void initEndpointControl() {
-        endpoints[CONTROL_EP] = *(usb.getDevTableEntry(0, 0));
+        endpoints[CONTROL_EP] = *(usb->getDevTableEntry(0, 0));
     }
 
     void initEndpointInput() {
@@ -148,8 +157,8 @@ private:
     }
 
     void readDeviceDesc() {
-        byte rcode = usb.getDevDescr(USB_ADDR, endpoints[CONTROL_EP].epAddr,
-                                     USB_DESCR_LEN, descrBuf);
+        byte rcode = usb->getDevDescr(USB_ADDR, endpoints[CONTROL_EP].epAddr,
+                                      USB_DESCR_LEN, descrBuf);
         if (rcode) {
             Serial.print("Error attempting read device descriptor. Return code: ");
             Serial.println(rcode, HEX);
@@ -158,8 +167,8 @@ private:
     }
 
     void configureDevice() {
-        byte rcode = usb.setConf(USB_ADDR, endpoints[CONTROL_EP].epAddr,
-                                 USB_CONFIG);
+        byte rcode = usb->setConf(USB_ADDR, endpoints[CONTROL_EP].epAddr,
+                                  USB_CONFIG);
         if (rcode) {
             Serial.print("Error attempting to configure USB. Return code: ");
             Serial.println(rcode, HEX);
@@ -175,8 +184,8 @@ private:
     }
 
     void pollUsb() {
-        byte rcode = usb.inTransfer(USB_ADDR, endpoints[INPUT_EP].epAddr,
-                                    USB_01_REPORT_LEN, buf);
+        byte rcode = usb->inTransfer(USB_ADDR, endpoints[INPUT_EP].epAddr,
+                                     USB_01_REPORT_LEN, buf);
         if (rcode != 0) {
             return;
         }
