@@ -1,0 +1,89 @@
+Device addressed... Requesting device descriptor.
+Device descriptor: 
+
+Descriptor Length:	12
+USB version:		1.10
+Class:			00 Use class information in the Interface Descriptor
+Subclass:		00
+Protocol:		00
+Max.packet size:	08
+Vendor  ID:		0A4D
+Product ID:		129D
+Revision ID:		0110
+Mfg.string index:	01 Length: 38 Contents: Keystation Mini 32
+Prod.string index:	02 Length: 38 Contents: Keystation Mini 32
+Serial number index:	00
+Number of conf.:	01
+
+Configuration number 0
+Total configuration length: 101 bytes
+
+Configuration descriptor:
+Total length:		0065
+Number of interfaces:	02
+Configuration value:	01
+Configuration string:	00
+Attributes:		80
+Max.power:		20 64ma
+
+Interface descriptor:
+Interface number:	00
+Alternate setting:	00
+Endpoints:		00
+Class:			01 Audio
+Subclass:		01
+Protocol:		00
+Interface string:	00
+
+Unknown descriptor:Length:		09
+Type:		24
+Contents:	010001090001010904
+
+Interface descriptor:
+Interface number:	01
+Alternate setting:	00
+Endpoints:		02
+Class:			01 Audio
+Subclass:		03
+Protocol:		00
+Interface string:	00
+
+Unknown descriptor:Length:		07
+Type:		24
+Contents:	01000141000624
+
+Unknown descriptor:Length:		06
+Type:		24
+Contents:	020101000624
+
+Unknown descriptor:Length:		06
+Type:		24
+Contents:	020202000924
+
+Unknown descriptor:Length:		09
+Type:		24
+Contents:	030109010201000924
+
+Unknown descriptor:Length:		09
+Type:		24
+Contents:	03020A010101000905
+
+Endpoint descriptor:
+Endpoint address:	01 Direction: IN
+Attributes:		02 Transfer type: Bulk
+Max.packet size:	0040
+Polling interval:	00 0 ms
+
+Unknown descriptor:Length:		05
+Type:		25
+Contents:	0101090905
+
+Endpoint descriptor:
+Endpoint address:	02 Direction: OUT
+Attributes:		02 Transfer type: Bulk
+Max.packet size:	0040
+Polling interval:	00 0 ms
+
+Unknown descriptor:Length:		05
+Type:		25
+Contents:	0101011FBB
