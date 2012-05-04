@@ -57,23 +57,25 @@
 // controlVal == (0-127)
 //////////////////////////
 
-/* LPK25 data taken from descriptors */
-// descriptors retrieved using descriptor_parser.pde (Usb library
-// example sketch)
-#define USB_ADDR            1
-#define USB_CONFIG          1
-#define USB_NUM_EP          3
-#define EP_MAXPKTSIZE       64
-#define EP_BULK             0x02
-#define EP_POLL             0x00 // 0x0B for Korg nanoKey
-#define CONTROL_EP          0
-#define OUTPUT_EP           1
-#define INPUT_EP            2
-#define USB_01_REPORT_LEN   0x09
-#define USB_DESCR_LEN       0x0C
-
 class CollinMidi {
 public:
+    enum {
+        USB_ADDR = 1,
+        USB_CONFIG = 1,
+        EP_MAXPKTSIZE = 64,
+        EP_BULK = 0x02,
+        EP_POLL = 0x00, // 0x0B for Korg nanoKey
+        USB_01_REPORT_LEN = 0x09,
+        USB_DESCR_LEN = 0x0C
+    };
+
+    enum {
+        USB_NUM_EP = 3,
+        CONTROL_EP = 0,
+        OUTPUT_EP = 1,
+        INPUT_EP  = 2,
+    };
+
     MAX3421E max;
     USB usb;
     char descrBuf[12]; // buffer for device description data
