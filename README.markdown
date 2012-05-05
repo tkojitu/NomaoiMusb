@@ -16,7 +16,7 @@ If you like shield-tower, you may use SparkFun's USB Host Shield instead of Ardu
 Acknowledgement
 ---------------
 
-I thank Collin Cunningham for his MIDI keyboard project (http://blog.makezine.com/2010/11/30/usbhacking/).
+I thank Collin Cunningham for his USB hacking (http://blog.makezine.com/2010/11/30/usbhacking/).
 
 I thank Arduino team, SparkFun and Open Source people.
 
