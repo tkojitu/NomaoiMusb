@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////
 
 #include "CollinMidi.h"
+#include "CollinMidiReceiver.h"
 
 // For general USB-MIDI compliance, we need to determine which
 // endpoint has a direction of IN and likely also need to get the poll
@@ -54,12 +55,14 @@
 // controlVal == (0-127)
 //////////////////////////
 
-CollinMidi::CollinMidi() : max3421e(NULL), usb(NULL) {
+CollinMidi::CollinMidi(CollinMidiReceiver* receiver)
+    : receiver(receiver),
+      max3421e(NULL),
+      usb(NULL) {
     max3421e = new MAX3421E();
     usb = new USB();
     memset(descrBuf, 0, sizeof(descrBuf));
     memset(buf, 0, sizeof(buf));
-    memset(oldBuf, 0, sizeof(buf));
     // avr libc does not support new/delete [].
     endpoints = (EP_RECORD*)calloc(USB_NUM_EP, sizeof(EP_RECORD));
 }
@@ -91,7 +94,6 @@ void CollinMidi::doTasks() {
 }
 
 void CollinMidi::initUsb() {
-    byte rcode = 0;
     initEndpointControl();
     initEndpointInput();
     initEndpointOutput();
@@ -159,14 +161,7 @@ void CollinMidi::pollUsb() {
     if (rcode != 0) {
         return;
     }
-    reportProcess();
-}
-
-void CollinMidi::reportProcess() {
-    Serial.print(byte(buf[1]), HEX);
-    Serial.print(" ");
-    Serial.print(byte(buf[2]), HEX);
-    Serial.print(" ");
-    Serial.print(byte(buf[3]), HEX);
-    Serial.print("\n");
+    if (receiver) {
+        receiver->receive(byte(buf[1]), byte(buf[2]), byte(buf[3]));
+    }
 }

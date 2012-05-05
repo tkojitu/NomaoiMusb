@@ -3,8 +3,10 @@
 
 #include <Usb.h>
 
+class CollinMidiReceiver;
+
 class CollinMidi {
-public:
+private:
     enum {
         USB_ADDR = 1,
         USB_CONFIG = 1,
@@ -26,11 +28,11 @@ public:
     USB* usb;
     char descrBuf[12]; // buffer for device description data
     char buf[4]; // buffer for USB-MIDI data
-    char oldBuf[4]; // buffer for old USB-MIDI data
     EP_RECORD* endpoints;
+    CollinMidiReceiver* receiver;
 
 public:
-    CollinMidi();
+    CollinMidi(CollinMidiReceiver* receiver);
     ~CollinMidi();
     void setup();
     void loop();
