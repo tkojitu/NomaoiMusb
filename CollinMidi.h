@@ -1,4 +1,12 @@
 // -*- mode: c++ -*-
+//////////////////////////////////////////////////////
+// LPK25 USB-MIDI to Serial MIDI converter
+// for use with USB Host Shield from Circuitsathome.com
+// by Collin Cunningham - makezine.com, narbotic.com
+//
+// modified for NomaoiMusb by tkojitu
+//////////////////////////////////////////////////////
+
 #pragma once
 
 #include <Usb.h>
